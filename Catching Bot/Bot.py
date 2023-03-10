@@ -2,9 +2,12 @@ from pymem import *
 from pymem.process import *
 from pymem.ptypes import *
 from Movement import *
-import tkinter as tk
-import mouse
+
 try:
+    def Quit():
+        print("Working")
+        os._exit(os.EX_OK)
+    keyboard.add_hotkey("a", Quit)
     pokemon = 0
 
     def getPointerAddress(base, offsets):
@@ -15,20 +18,8 @@ try:
                     pm.process_handle, remote_pointer.value + offset)
             else:
                 return remote_pointer.value + offset
-    run_pos = mouse_pos("\nClick where run button is there: ")
-    print(run_pos)
-    attk_pos = mouse_pos("Click where attk button is there: ")
-    print(attk_pos)
-    falseswipe_pos = mouse_pos("Click where FalseSwipe Attk button is there: ")
-    print(falseswipe_pos)
-    bag_pos = mouse_pos("Click where bag button is there:")
-    print(bag_pos)
-    pokeball_pos = mouse_pos("Click where pokeball button is there: ")
-    print(pokeball_pos)
-    pokemon_location = mouse_pos("Click where pokemon button is there: ")
-    print(pokemon_location)
-    falseswipePoke_pos = mouse_pos("Click where Falseswipe_Pokemon is there: ")
-
+    Postions = []
+    Postions = blockScreen()
     pm = Pymem("PROClient.exe")
     gameModule = module_from_name(
         pm.process_handle, "GameAssembly.dll").lpBaseOfDll
@@ -40,14 +31,19 @@ try:
     Health_Ads = getPointerAddress(gameModule+0x00DD83D0,
                                    offsets=[0xB8, 0x0, 0x8B4])
     print(pm.read_int(Health_Ads))
-    Id_Input = int(input("Enter Pokemon it u want Catch: "))
-    many = int(input("How many do u want catch: "))
+    Pokemons = []
+    Id_Input_2 = input("[Ex: 14, 52, 64] Enter Pokemons Id: ")
+    Pokemons = Id_Input_2.split(",")
+    print(Pokemons)
+    Pokemons = [eval(i) for i in Pokemons]
+    print(Pokemons)
+    # time.sleep(50)
 
     def catch():
         while True:
-            if pokemon == many:
-                print(f"catched {many}")
-                break
+            if pokemon == 40:
+                os._exit(os.EX_OK)
+
             press_key("PROClient", "a")
             press_key("PROClient", "a")
             press_key("PROClient", "a")
@@ -59,36 +55,38 @@ try:
             press_key("PROClient", "d")
             press_key("PROClient", "d")
             if detect_image("H:\\GameHacking\\ProBot\\Probot\\Catching Bot\\Images\\Dec.png") is not None:
-                if (pm.read_int(Id_Ads) == Id_Input):
-                    Markings()
-                else:
-                    pyautogui.moveTo(run_pos[0], run_pos[1])
-                    click_Left()
+                for x in range(len(Pokemons)):
+                    if (pm.read_int(Id_Ads) == Pokemons[x]):
+                        Markings()
+                    else:
+                        if x == len(Pokemons):
+                            pyautogui.moveTo(Postions[0][0], Postions[0][1])
+                            click_Left()
 
     def Markings():
         sycn = True
         while True:
             if sycn == True:
-                    time.sleep(7.0)
-                    pyautogui.moveTo(pokemon_location[0], pokemon_location[1])
-                    click_Left()
-                    pyautogui.moveTo(
-                        falseswipePoke_pos[0], falseswipePoke_pos[1])
-                    click_Left()
-                    sycn = False
-                    time.sleep(3.0)
-            if (pm.read_int(Health_Ads) > 2):
-                pyautogui.moveTo(attk_pos[0], attk_pos[1])
+                time.sleep(7.0)
+                pyautogui.moveTo(Postions[5][0], Postions[5][1])
                 click_Left()
-                pyautogui.moveTo(falseswipe_pos[0], falseswipe_pos[1])
+                pyautogui.moveTo(
+                    Postions[6][0], Postions[6][1])
+                click_Left()
+                sycn = False
+                time.sleep(3.0)
+            if (pm.read_int(Health_Ads) > 2):
+                pyautogui.moveTo(Postions[1][0], Postions[1][1])
+                click_Left()
+                pyautogui.moveTo(Postions[2][0], Postions[2][1])
                 click_Left()
             else:
                 break
         while True:
             if detect_image("H:\\GameHacking\\ProBot\\Probot\\Catching Bot\\Images\\Dec.png") is not None:
-                pyautogui.moveTo(bag_pos[0], bag_pos[1])
+                pyautogui.moveTo(Positions[3][0], Positions[3][1])
                 click_Left()
-                pyautogui.moveTo(pokeball_pos[0], pokeball_pos[1])
+                pyautogui.moveTo(Positions[4][0], Positions[4][1])
                 click_Left()
                 time.sleep(1.0)
             else:
