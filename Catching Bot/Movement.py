@@ -6,6 +6,8 @@ import win32con
 from pynput import mouse
 from tkinter import *
 import keyboard
+import json
+from colorama import Fore
 
 NumberOfMouseClicks = 0
 
@@ -13,15 +15,12 @@ NumberOfMouseClicks = 0
 class MyException(Exception):
     pass
 
-
 listener = ""
 xA = ""
 yA = ""
-tk = Tk()
+tk = ''
 click = 0
 Positions = []
-
-
 def _on_click(x, y, button, pressed):
     if pressed:
         global xA, yA
@@ -33,40 +32,49 @@ def _on_click(x, y, button, pressed):
 def lossfocus(event):
     for i in range(150):
         keyboard.block_key(i)
+    # label.config(text="Click where Run button is there")
     run_pos = mouse_pos("\nClick where run button is there: ")
-    print(run_pos)
-    attk_pos = mouse_pos("Click where attk button is there: ")
-    print(attk_pos)
+    print(Fore.GREEN+run_pos)
+    attk_pos = mouse_pos("Click where attack button is there: ")
+    # label.config(text="Click where Attack button is there")
+    print(Fore.GREEN+attk_pos)
     falseswipe_pos = mouse_pos("Click where FalseSwipe Attk button is there: ")
-    print(falseswipe_pos)
+    # label.config(text="Click where FalseSwipe Attack button is there")
+    print(Fore.GREEN+falseswipe_pos)
     bag_pos = mouse_pos("Click where bag button is there:")
-    print(bag_pos)
+    # label.config(text="Click where Bag button is there")
+    print(Fore.GREEN+bag_pos)
     pokeball_pos = mouse_pos("Click where pokeball button is there: ")
-    print(pokeball_pos)
-    pokemon_location = mouse_pos("Click where pokemon button is there: ")
-    print(pokemon_location)
+    # label.config(text="Click where pokeball button is there Pokeballs should be more then 70")
+    print(Fore.GREEN+pokeball_pos)
+    pokemon_location = mouse_pos("Click where Change pokemon button is there: ")
+    # label.config(text="Click where Change Pokemon button is there")
+    print(Fore.GREEN+pokemon_location)
     falseswipePoke_pos = mouse_pos("Click where Falseswipe_Pokemon is there: ")
-    print(falseswipePoke_pos)
+    # label.config(text="Click where Falseswipe_Pokemon is there")
+    print(Fore.GREEN+falseswipePoke_pos)
     tk.destroy()
     global Positions
-    Positions = run_pos,attk_pos,falseswipe_pos,bag_pos,pokeball_pos,pokemon_location,falseswipe_pos
+    Positions = run_pos, attk_pos, falseswipe_pos, bag_pos, pokeball_pos, pokemon_location, falseswipe_pos
     for i in range(150):
         keyboard.unblock_key(i)
 
 
 def mouse_pos(print_s):
-    print(print_s)
+    print(Fore.GREEN+print_s)
     global listener
     with mouse.Listener(on_click=_on_click) as listener:
         try:
             listener.join()
         except MyException as e:
-            print(e)
+            print(Fore.RED+e)
     return xA, yA
 
 
 shell = win32com.client.Dispatch("WScript.Shell")
 
+def focus_window(Windown_Name):
+    shell.AppActivate(Windown_Name)
 
 def press_key(Windown_Name, key):
     shell.AppActivate(Windown_Name)
@@ -80,7 +88,7 @@ def locate_image(Image):
     if start is not None:
         pyautogui.moveTo(start)
     else:
-        print("Image not detected")
+        print(Fore.RED+"Image not detected")
 
 
 def detect_image(Image):
@@ -102,10 +110,34 @@ def click_Right():
 
 
 def blockScreen():
-    tk.attributes('-fullscreen', True)
-    tk.config(bg='black')
-    tk.attributes('-alpha', 0.3)
-    tk.bind('<ButtonRelease-1>', lossfocus)
-    tk.mainloop()
+    global Positions
+    As = int(input("Press 1 to Use Saved Locations or Press 2 to Choose Locations: "))
+    if As == 1:
+        with open('Locations.txt') as f:
+            for line in f:
+                a = line.strip()
+                Positions.append(a)
+            f.close()
+            pos = []
+            for x in range(len(Positions)):
+                pos.append(eval(Positions[x]))
+            Positions = pos
+            f.close()
+    elif As == 2:
+        global tk
+        tk = Tk()
+        tk.title('Input')
+        tk.attributes('-fullscreen', True)
+        tk.config(bg='black')
+        tk.attributes('-alpha', 0.3)
+        focus_window("PROClient")
+        focus_window("Input")
+        tk.bind('<ButtonRelease-1>', lossfocus)
+        tk.mainloop()
+        f = open("Locations.txt", 'w+')
+        for x in range(len(Positions)):
+            jsonString = json.dumps(Positions[x])
+            jsonFile = f
+            jsonFile.write("%s\n" % jsonString)
+        jsonFile.close()
     return Positions
-
